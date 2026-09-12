@@ -1,0 +1,13 @@
+# Notas de planejamento internas, não fazem parte da entrega
+ROTEIRO-DESENVOLVIMENTO.md
+
+# Ambientes
+.env
+.env.*
+!.env.example
+
+# Build/deps
+node_modules/
+target/
+dist/
+.next/
