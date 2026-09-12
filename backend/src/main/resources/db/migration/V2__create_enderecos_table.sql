@@ -1,13 +1,13 @@
 CREATE TABLE enderecos (
     id           BIGSERIAL PRIMARY KEY,
     usuario_id   BIGINT         NOT NULL REFERENCES usuarios (id) ON DELETE CASCADE,
-    cep          CHAR(8)        NOT NULL,
+    cep          VARCHAR(8)     NOT NULL,
     numero       VARCHAR(20)    NOT NULL,
     complemento  VARCHAR(100),
     logradouro   VARCHAR(150)   NOT NULL,
     bairro       VARCHAR(100)   NOT NULL,
     cidade       VARCHAR(100)   NOT NULL,
-    estado       CHAR(2)        NOT NULL,
+    estado       VARCHAR(2)     NOT NULL,
     principal    BOOLEAN        NOT NULL DEFAULT FALSE
 );
 
