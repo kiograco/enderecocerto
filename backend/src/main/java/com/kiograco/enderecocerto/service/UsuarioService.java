@@ -6,6 +6,7 @@ import com.kiograco.enderecocerto.entity.TipoUsuario;
 import com.kiograco.enderecocerto.entity.Usuario;
 import com.kiograco.enderecocerto.exception.CpfDuplicadoException;
 import com.kiograco.enderecocerto.exception.CpfInvalidoException;
+import com.kiograco.enderecocerto.exception.UsuarioNaoEncontradoException;
 import com.kiograco.enderecocerto.repository.UsuarioRepository;
 import com.kiograco.enderecocerto.validation.ValidadorCpf;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,12 @@ public class UsuarioService {
 
         Usuario salvo = usuarioRepository.save(usuario);
         return UsuarioResponse.from(salvo);
+    }
+
+    public UsuarioResponse buscarPorId(Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuario nao encontrado"));
+        return UsuarioResponse.from(usuario);
     }
 
     private void validarFormatoCpf(String cpf) {
