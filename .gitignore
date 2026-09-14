@@ -11,3 +11,9 @@ node_modules/
 target/
 dist/
 .next/
+backend/data/*.mv.db
+backend/src/main/resources/application-local.yml
+
+# TypeScript (Next.js regenerates these)
+*.tsbuildinfo
+frontend/next-env.d.ts
