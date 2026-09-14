@@ -2,5 +2,5 @@ package com.kiograco.enderecocerto.dto;
 
 import com.kiograco.enderecocerto.entity.TipoUsuario;
 
-public record LoginResponse(String token, TipoUsuario tipo) {
+public record LoginResponse(String token, Long usuarioId, TipoUsuario tipo) {
 }

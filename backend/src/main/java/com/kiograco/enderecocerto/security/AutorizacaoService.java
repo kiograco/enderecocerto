@@ -17,4 +17,10 @@ public class AutorizacaoService {
             throw new AcessoNegadoException("Acesso negado a recurso de outro usuario");
         }
     }
+
+    public void garantirAdmin(UsuarioAutenticado logado) {
+        if (!logado.isAdmin()) {
+            throw new AcessoNegadoException("Acesso restrito a administradores");
+        }
+    }
 }

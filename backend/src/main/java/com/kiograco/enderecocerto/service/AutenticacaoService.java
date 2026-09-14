@@ -30,7 +30,7 @@ public class AutenticacaoService {
         }
 
         String token = jwtService.gerarToken(usuario);
-        return new LoginResponse(token, usuario.getTipo());
+        return new LoginResponse(token, usuario.getId(), usuario.getTipo());
     }
 
     private String apenasDigitos(String cpf) {

@@ -6,6 +6,7 @@ import com.kiograco.enderecocerto.security.AutorizacaoService;
 import com.kiograco.enderecocerto.security.UsuarioAutenticado;
 import com.kiograco.enderecocerto.service.UsuarioService;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,5 +38,11 @@ public class UsuarioController {
     ) {
         autorizacaoService.garantirAcessoAoRecurso(logado, id);
         return usuarioService.buscarPorId(id);
+    }
+
+    @GetMapping
+    public List<UsuarioResponse> listar(@AuthenticationPrincipal UsuarioAutenticado logado) {
+        autorizacaoService.garantirAdmin(logado);
+        return usuarioService.listarTodos();
     }
 }

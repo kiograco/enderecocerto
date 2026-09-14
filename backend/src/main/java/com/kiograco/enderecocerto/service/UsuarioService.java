@@ -9,6 +9,7 @@ import com.kiograco.enderecocerto.exception.CpfInvalidoException;
 import com.kiograco.enderecocerto.exception.UsuarioNaoEncontradoException;
 import com.kiograco.enderecocerto.repository.UsuarioRepository;
 import com.kiograco.enderecocerto.validation.ValidadorCpf;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,10 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuario nao encontrado"));
         return UsuarioResponse.from(usuario);
+    }
+
+    public List<UsuarioResponse> listarTodos() {
+        return usuarioRepository.findAll().stream().map(UsuarioResponse::from).toList();
     }
 
     private void validarFormatoCpf(String cpf) {
