@@ -21,5 +21,9 @@ security:
     secret: ${JWT_SECRET:dev-secret-troque-em-producao-dev-secret-troque}
     expiration-minutes: ${JWT_EXPIRATION_MINUTES:60}
 
+viacep:
+  base-url: ${VIACEP_BASE_URL:https://viacep.com.br/ws}
+  cache-ttl-minutes: ${VIACEP_CACHE_TTL_MINUTES:60}
+
 server:
   port: ${PORT:8080}
