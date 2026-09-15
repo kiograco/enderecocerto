@@ -107,5 +107,10 @@ cd frontend
 pnpm test
 ```
 
-15 testes com Vitest, cobrindo a validação de CPF no cliente (`features/usuarios/validar-cpf.ts`) com os mesmos casos do `ValidadorCpfTest` do backend — os dois lados usam o mesmo algoritmo de dígito verificador, implementado separadamente de propósito. O resto do frontend (telas, formulários) foi verificado manualmente, não tem suíte automatizada.
+22 testes com Vitest + Testing Library:
+- Validação de CPF no cliente (`features/usuarios/validar-cpf.ts`), com os mesmos casos do `ValidadorCpfTest` do backend — os dois lados usam o mesmo algoritmo de dígito verificador, implementado separadamente de propósito.
+- `FormularioEndereco`: autofill dos campos ao digitar um CEP válido, erro tratado quando o CEP não é encontrado, e que cria ou atualiza o endereço certo dependendo se já existe um `enderecoExistente`.
+- `ListaEnderecosDoUsuario`: marcar outro endereço como principal, excluir só depois de confirmar no diálogo, e o estado vazio.
+
+As demais telas (login, cadastro, listagem de usuários) foram verificadas manualmente, sem teste automatizado.
 
