@@ -80,12 +80,14 @@ public class EnderecoService {
     }
 
     // Desmarca o principal atual do usuario, se houver, pra abrir espaco pro novo --
-    // as duas escritas acontecem na mesma transacao do metodo chamador.
+    // as duas escritas acontecem na mesma transacao do metodo chamador. O flush aqui
+    // e obrigatorio: sem ele o Hibernate pode enviar a escrita do novo principal antes
+    // desta, violando por um instante o indice unico parcial (um principal por usuario).
     private void desmarcarPrincipalAtual(Long usuarioId) {
         enderecoRepository.findByUsuarioIdAndPrincipalTrue(usuarioId)
                 .ifPresent(atual -> {
                     atual.setPrincipal(false);
-                    enderecoRepository.save(atual);
+                    enderecoRepository.saveAndFlush(atual);
                 });
     }
 

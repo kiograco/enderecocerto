@@ -6,8 +6,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.kiograco.enderecocerto.dto.EnderecoRequest;
-import com.kiograco.enderecocerto.dto.EnderecoResponse;
 import com.kiograco.enderecocerto.entity.Endereco;
 import com.kiograco.enderecocerto.entity.TipoUsuario;
 import com.kiograco.enderecocerto.entity.Usuario;
@@ -33,24 +31,10 @@ class EnderecoServiceTest {
     @InjectMocks
     private EnderecoService enderecoService;
 
-    @Test
-    void criarEndereco_marcandoComoPrincipal_desmarcaPrincipalAnterior() {
-        Long usuarioId = 1L;
-        Usuario usuario = usuarioComId(usuarioId);
-        Endereco principalAtual = enderecoComId(10L, usuario, true);
-
-        when(usuarioRepository.findById(usuarioId)).thenReturn(Optional.of(usuario));
-        when(enderecoRepository.findByUsuarioIdAndPrincipalTrue(usuarioId)).thenReturn(Optional.of(principalAtual));
-        when(enderecoRepository.save(any(Endereco.class))).thenAnswer(invocacao -> invocacao.getArgument(0));
-
-        EnderecoRequest request = new EnderecoRequest(
-                "01001000", "200", null, "Praca da Se", "Se", "Sao Paulo", "SP", true
-        );
-        EnderecoResponse response = enderecoService.criarEndereco(usuarioId, request);
-
-        assertThat(principalAtual.isPrincipal()).isFalse();
-        assertThat(response.principal()).isTrue();
-    }
+    // A troca de endereco principal (desmarcar o antigo + marcar o novo) e coberta por
+    // EnderecoServicePrincipalIntegrationTest, contra Postgres de verdade -- com repositorio
+    // mockado esse fluxo sempre "passa" mesmo quebrando o indice unico parcial do banco
+    // (um so principal por usuario), porque o mock nunca aplica a constraint real.
 
     @Test
     void excluirEndereco_quandoEraPrincipal_promoveEnderecoMaisAntigoRestante() {
