@@ -205,11 +205,11 @@ export function FormularioEndereco({
               <Switch id="principal" checked={principal} onCheckedChange={setPrincipal} />
             </div>
 
-            <div className="flex justify-end gap-3 pt-2">
-              <Button type="button" variant="outline" onClick={onCancelar}>
+            <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
+              <Button type="button" variant="outline" className="sm:w-auto" onClick={onCancelar}>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={buscandoCep || salvando}>
+              <Button type="submit" className="sm:w-auto" disabled={buscandoCep || salvando}>
                 {salvando ? "Salvando..." : "Salvar endereço"} <Check data-icon="inline-end" />
               </Button>
             </div>

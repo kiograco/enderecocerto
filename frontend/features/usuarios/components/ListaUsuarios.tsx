@@ -71,20 +71,20 @@ export function ListaUsuarios() {
               onClick={() => router.push(`/usuarios/${u.id}`)}
               className="flex items-center justify-between rounded-2xl border bg-card p-5 text-left shadow-sm transition-shadow hover:shadow-md"
             >
-              <div className="flex items-center gap-4">
-                <div className="flex size-11 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary">
+              <div className="flex min-w-0 flex-1 items-center gap-4">
+                <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary">
                   {u.nome
                     .split(" ")
                     .map((n) => n[0])
                     .slice(0, 2)
                     .join("")}
                 </div>
-                <div>
-                  <p className="font-medium">{u.nome}</p>
+                <div className="min-w-0">
+                  <p className="truncate font-medium">{u.nome}</p>
                   <p className="text-sm text-muted-foreground">{formatarCpf(u.cpf)}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex shrink-0 items-center gap-4">
                 {u.tipo === "ADMIN" && <Badge variant="outline">Admin</Badge>}
                 <ChevronRight className="size-4 text-muted-foreground" />
               </div>

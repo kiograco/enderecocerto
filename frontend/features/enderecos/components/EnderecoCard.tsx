@@ -20,9 +20,9 @@ export function EnderecoCard({
   return (
     <Card className={endereco.principal ? "border-primary/60 bg-primary/[0.04] shadow-md shadow-primary/5" : ""}>
       <CardHeader className="flex-row items-start justify-between gap-3 space-y-0">
-        <div>
-          <div className="flex items-center gap-2">
-            <CardTitle className="text-base">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <CardTitle className="text-base break-words">
               {endereco.logradouro}, {endereco.numero}
             </CardTitle>
             {endereco.principal && (
@@ -40,9 +40,9 @@ export function EnderecoCard({
             CEP {formatarCep(endereco.cep)}
           </CardDescription>
         </div>
-        <MapPin className="size-5 text-primary" />
+        <MapPin className="size-5 shrink-0 text-primary" />
       </CardHeader>
-      <CardContent className="flex gap-2 pt-0">
+      <CardContent className="flex flex-wrap gap-2 pt-0">
         <Button size="sm" variant="outline" onClick={onEditar}>
           <Pencil data-icon="inline-start" /> Editar
         </Button>
