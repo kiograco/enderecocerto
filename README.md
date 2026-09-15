@@ -55,6 +55,26 @@ pnpm dev
 ```
 Abre em `localhost:3000`. Sem configuração extra, ele já aponta pro backend em `localhost:8080`.
 
+## Como virar administrador
+
+O cadastro público (`POST /usuarios`, tela `/cadastro`) sempre cria um usuário **COMUM** — de propósito, ninguém pode se autoconceder acesso de admin pela API (veja o comentário em `UsuarioService.criarUsuario`). Não existe seed de admin no Flyway também de propósito: hardcodar uma senha de admin numa migration que roda em produção, num repositório público, seria expor credencial de admin pra qualquer um que ler o código.
+
+Pra promover o primeiro admin, mexa direto no banco depois de cadastrar o usuário normalmente pela tela:
+
+**Com Docker Compose:**
+```bash
+docker compose exec postgres psql -U postgres -d enderecocerto -c "UPDATE usuarios SET tipo = 'ADMIN' WHERE cpf = '00000000000';"
+```
+
+**Postgres local (sem Docker):**
+```bash
+psql -U postgres -d enderecocerto -c "UPDATE usuarios SET tipo = 'ADMIN' WHERE cpf = '00000000000';"
+```
+
+**No Render:** abra o banco `enderecocerto-db` no dashboard → aba "Connect" → copie a `PSQL Command` e rode o mesmo `UPDATE` acima.
+
+Troque `00000000000` pelo CPF (só dígitos) do usuário que você cadastrou. No próximo login, o token já sai com `tipo: ADMIN` e a tela `/usuarios` (listagem, admin-only) fica acessível.
+
 ## Deploy (Render)
 
 `render.yaml` na raiz descreve os três serviços (Postgres + backend + frontend, cada um via seu Dockerfile) como um [Blueprint](https://render.com/docs/blueprint-spec) do Render:
@@ -100,7 +120,7 @@ cd backend
 mvn test
 ```
 
-23 testes: validação de CPF (dígitos verificadores, sequências repetidas), a regra de troca do endereço principal e a promoção automática após exclusão, e autorização ponta a ponta (usuário comum recebe 403 ao tentar acessar recurso de outro usuário ou a listagem de admin). Rodam contra H2 em memória, sem precisar de Postgres.
+24 testes: validação de CPF (dígitos verificadores, sequências repetidas), a promoção automática de principal após exclusão, e autorização ponta a ponta (usuário comum recebe 403 ao tentar acessar recurso de outro usuário ou a listagem de admin) rodam contra H2 em memória, sem precisar de Postgres. A troca de endereço principal (`EnderecoServicePrincipalIntegrationTest`) roda contra Postgres real via Testcontainers — precisa de Docker disponível — porque depende de uma constraint do banco (índice único parcial) que o H2 com schema gerado pelo Hibernate não reproduz.
 
 ```bash
 cd frontend
