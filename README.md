@@ -90,4 +90,10 @@ mvn test
 
 23 testes: validação de CPF (dígitos verificadores, sequências repetidas), a regra de troca do endereço principal e a promoção automática após exclusão, e autorização ponta a ponta (usuário comum recebe 403 ao tentar acessar recurso de outro usuário ou a listagem de admin). Rodam contra H2 em memória, sem precisar de Postgres.
 
-O frontend não tem suíte de testes automatizados — a verificação de responsividade e dos fluxos de tela foi manual.
+```bash
+cd frontend
+pnpm test
+```
+
+15 testes com Vitest, cobrindo a validação de CPF no cliente (`features/usuarios/validar-cpf.ts`) com os mesmos casos do `ValidadorCpfTest` do backend — os dois lados usam o mesmo algoritmo de dígito verificador, implementado separadamente de propósito. O resto do frontend (telas, formulários) foi verificado manualmente, não tem suíte automatizada.
+
