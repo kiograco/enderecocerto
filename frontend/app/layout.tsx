@@ -2,6 +2,7 @@ import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Toaster } from 'sonner'
 import { AuthProvider } from '@/features/auth/auth-context'
+import { QueryProvider } from '@/lib/query-provider'
 import './globals.css'
 
 export const metadata: Metadata = { title: 'EnderecoCerto — Seus endereços, sempre no lugar', description: 'Cadastre, organize e encontre seus endereços com simplicidade.', generator: 'v0.app' }
@@ -10,10 +11,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="pt-BR" className="bg-background">
       <body className="antialiased">
-        <AuthProvider>
-          <Toaster position="top-right" richColors />
-          {children}
-        </AuthProvider>
+        <QueryProvider>
+          <AuthProvider>
+            <Toaster position="top-right" richColors />
+            {children}
+          </AuthProvider>
+        </QueryProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

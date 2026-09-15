@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 import { toast } from "sonner"
@@ -8,24 +8,20 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { ListaEnderecosDoUsuario } from "@/features/enderecos/components/ListaEnderecosDoUsuario"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { useAuth } from "@/features/auth/auth-context"
-import { buscarUsuarioPorId } from "../usuario-service"
-import type { Usuario } from "../types"
+import { useUsuario } from "../usuario-queries"
 
 export function DetalheUsuario({ usuarioId }: { usuarioId: number }) {
-  const [usuario, setUsuario] = useState<Usuario | null>(null)
+  const { data: usuario, isError, error } = useUsuario(usuarioId)
   const { usuario: logado } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    setUsuario(null)
-    buscarUsuarioPorId(usuarioId)
-      .then(setUsuario)
-      .catch((error) => {
-        toast.error(getApiErrorMessage(error, "Não foi possível carregar este usuário"))
-        router.replace(logado?.tipo === "ADMIN" ? "/usuarios" : `/usuarios/${logado?.id}`)
-      })
+    if (isError) {
+      toast.error(getApiErrorMessage(error, "Não foi possível carregar este usuário"))
+      router.replace(logado?.tipo === "ADMIN" ? "/usuarios" : `/usuarios/${logado?.id}`)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [usuarioId])
+  }, [isError])
 
   return (
     <>

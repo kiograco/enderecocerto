@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CpfInput } from "@/components/cpf-input"
 import { getApiErrorMessage } from "@/lib/api-error"
-import { criarUsuario } from "../usuario-service"
+import { useCriarUsuario } from "../usuario-queries"
 import { cpfValido } from "../validar-cpf"
 
 export function FormularioCadastroUsuario() {
@@ -19,8 +19,8 @@ export function FormularioCadastroUsuario() {
   const [dataNascimento, setDataNascimento] = useState("")
   const [senha, setSenha] = useState("")
   const [confirmarSenha, setConfirmarSenha] = useState("")
-  const [enviando, setEnviando] = useState(false)
   const router = useRouter()
+  const criarMutation = useCriarUsuario()
 
   const cpfDigitado = cpf.replace(/\D/g, "").length === 11
   const cpfEhValido = cpfDigitado && cpfValido(cpf)
@@ -37,15 +37,12 @@ export function FormularioCadastroUsuario() {
       return
     }
 
-    setEnviando(true)
     try {
-      await criarUsuario({ nome, cpf: cpf.replace(/\D/g, ""), dataNascimento, senha })
+      await criarMutation.mutateAsync({ nome, cpf: cpf.replace(/\D/g, ""), dataNascimento, senha })
       toast.success("Conta criada! Faça login para continuar.")
       router.replace("/login")
     } catch (error) {
       toast.error(getApiErrorMessage(error, "Não foi possível criar sua conta"))
-    } finally {
-      setEnviando(false)
     }
   }
 
@@ -118,8 +115,8 @@ export function FormularioCadastroUsuario() {
                   required
                 />
               </div>
-              <Button type="submit" className="mt-2 w-full" disabled={enviando}>
-                {enviando ? "Criando conta..." : "Criar minha conta"} <ArrowRight data-icon="inline-end" />
+              <Button type="submit" className="mt-2 w-full" disabled={criarMutation.isPending}>
+                {criarMutation.isPending ? "Criando conta..." : "Criar minha conta"} <ArrowRight data-icon="inline-end" />
               </Button>
             </form>
           </CardContent>

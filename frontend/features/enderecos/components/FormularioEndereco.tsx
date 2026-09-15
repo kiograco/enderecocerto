@@ -11,8 +11,9 @@ import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { getApiErrorMessage } from "@/lib/api-error"
-import { consultarCep } from "../cep-service"
-import { criarEndereco, atualizarEndereco } from "../endereco-service"
+import { useDebouncedValue } from "@/lib/use-debounced-value"
+import { useCep } from "../cep-queries"
+import { useAtualizarEndereco, useCriarEndereco } from "../endereco-queries"
 import type { Endereco } from "../types"
 
 function aplicarMascaraCep(valor: string): string {
@@ -34,7 +35,6 @@ export function FormularioEndereco({
   onCancelar: () => void
 }) {
   const [cep, setCep] = useState(enderecoExistente ? formatarCepExibicao(enderecoExistente.cep) : "")
-  const [buscandoCep, setBuscandoCep] = useState(false)
   const [cepEncontrado, setCepEncontrado] = useState(Boolean(enderecoExistente))
   const [logradouro, setLogradouro] = useState(enderecoExistente?.logradouro ?? "")
   const [numero, setNumero] = useState(enderecoExistente?.numero ?? "")
@@ -43,42 +43,42 @@ export function FormularioEndereco({
   const [cidade, setCidade] = useState(enderecoExistente?.cidade ?? "")
   const [estado, setEstado] = useState(enderecoExistente?.estado ?? "")
   const [principal, setPrincipal] = useState(enderecoExistente?.principal ?? marcarComoPrincipalPorPadrao)
-  const [salvando, setSalvando] = useState(false)
 
   // Busca automatica com debounce quando o CEP fica completo (8 digitos) --
   // atende "ao perder o foco (ou debounce)" do roteiro sem depender de blur.
+  // useCep so dispara quando cepDebounced tiver 8 digitos, e o React Query
+  // cacheia por CEP (staleTime: Infinity) -- reconsultar o mesmo CEP na
+  // mesma sessao nao bate na API de novo.
+  const cepDigitos = cep.replace(/\D/g, "")
+  const cepDebounced = useDebouncedValue(cepDigitos, 500)
+  const cepQuery = useCep(cepDebounced)
+  const buscandoCep = cepQuery.isFetching
+
   useEffect(() => {
-    const digitos = cep.replace(/\D/g, "")
-    if (digitos.length !== 8) return
+    if (!cepQuery.data) return
+    setLogradouro(cepQuery.data.logradouro)
+    setBairro(cepQuery.data.bairro)
+    setCidade(cepQuery.data.cidade)
+    setEstado(cepQuery.data.estado)
+    setCepEncontrado(true)
+    toast.success("Endereço encontrado pelo CEP!")
+  }, [cepQuery.data])
 
-    const timer = setTimeout(async () => {
-      setBuscandoCep(true)
-      try {
-        const resultado = await consultarCep(digitos)
-        setLogradouro(resultado.logradouro)
-        setBairro(resultado.bairro)
-        setCidade(resultado.cidade)
-        setEstado(resultado.estado)
-        setCepEncontrado(true)
-        toast.success("Endereço encontrado pelo CEP!")
-      } catch (error) {
-        setCepEncontrado(false)
-        toast.error(getApiErrorMessage(error, "CEP não encontrado"))
-      } finally {
-        setBuscandoCep(false)
-      }
-    }, 500)
+  useEffect(() => {
+    if (!cepQuery.isError) return
+    setCepEncontrado(false)
+    toast.error(getApiErrorMessage(cepQuery.error, "CEP não encontrado"))
+  }, [cepQuery.isError, cepQuery.error])
 
-    return () => clearTimeout(timer)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cep])
+  const criarMutation = useCriarEndereco(usuarioId)
+  const atualizarMutation = useAtualizarEndereco(usuarioId)
+  const salvando = criarMutation.isPending || atualizarMutation.isPending
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setSalvando(true)
     try {
       const request = {
-        cep: cep.replace(/\D/g, ""),
+        cep: cepDigitos,
         numero,
         complemento: complemento || null,
         logradouro,
@@ -88,14 +88,12 @@ export function FormularioEndereco({
         principal,
       }
       const endereco = enderecoExistente
-        ? await atualizarEndereco(usuarioId, enderecoExistente.id, request)
-        : await criarEndereco(usuarioId, request)
+        ? await atualizarMutation.mutateAsync({ enderecoId: enderecoExistente.id, request })
+        : await criarMutation.mutateAsync(request)
       toast.success(enderecoExistente ? "Endereço atualizado." : "Endereço adicionado.")
       onSalvar(endereco)
     } catch (error) {
       toast.error(getApiErrorMessage(error, "Não foi possível salvar o endereço"))
-    } finally {
-      setSalvando(false)
     }
   }
 

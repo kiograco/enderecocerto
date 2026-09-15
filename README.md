@@ -16,7 +16,7 @@ Cadastro de usuários e seus endereços, com preenchimento automático via [ViaC
 |---|---|---|
 | Backend | Java 21 + Spring Boot 3.3.4 (Maven) | Ecossistema maduro, fácil achar referência se travar em algo |
 | Banco | PostgreSQL (Flyway) em dev/produção; H2 para testes | Migrations versionadas em vez de deixar o Hibernate gerar schema; H2 evita depender de infra pra rodar teste |
-| Frontend | Next.js 16 + React 19 + TailwindCSS + shadcn/ui, Axios | Scaffold já vinha do v0.app; Axios com interceptor centraliza o envio do JWT |
+| Frontend | Next.js 16 + React 19 + TailwindCSS + shadcn/ui, Axios, TanStack Query | Scaffold já vinha do v0.app; Axios com interceptor centraliza o envio do JWT; React Query cuida de cache, invalidação e estado de loading/erro das chamadas à API |
 | Autenticação | JWT guardado em memória no front (não em localStorage) | Evita que um XSS simples vaze o token |
 
 Monorepo com `backend/` e `frontend/` — clona uma coisa só pra avaliar o projeto inteiro.

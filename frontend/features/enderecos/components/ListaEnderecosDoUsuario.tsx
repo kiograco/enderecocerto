@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Home, Plus } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getApiErrorMessage } from "@/lib/api-error"
-import { excluirEndereco, listarEnderecosDoUsuario, atualizarEndereco } from "../endereco-service"
+import { useAtualizarEndereco, useEnderecosDoUsuario, useExcluirEndereco } from "../endereco-queries"
 import type { Endereco } from "../types"
 import { EnderecoCard } from "./EnderecoCard"
 import { FormularioEndereco } from "./FormularioEndereco"
@@ -25,28 +25,16 @@ import { FormularioEndereco } from "./FormularioEndereco"
 type Modo = { tipo: "lista" } | { tipo: "novo" } | { tipo: "editar"; endereco: Endereco }
 
 export function ListaEnderecosDoUsuario({ usuarioId }: { usuarioId: number }) {
-  const [enderecos, setEnderecos] = useState<Endereco[] | null>(null)
+  const { data: enderecos, isLoading } = useEnderecosDoUsuario(usuarioId)
+  const atualizarMutation = useAtualizarEndereco(usuarioId)
+  const excluirMutation = useExcluirEndereco(usuarioId)
   const [modo, setModo] = useState<Modo>({ tipo: "lista" })
   const [enderecoParaExcluir, setEnderecoParaExcluir] = useState<Endereco | null>(null)
 
-  async function recarregar() {
-    try {
-      setEnderecos(await listarEnderecosDoUsuario(usuarioId))
-    } catch (error) {
-      toast.error(getApiErrorMessage(error, "Não foi possível carregar os endereços"))
-    }
-  }
-
-  useEffect(() => {
-    recarregar()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [usuarioId])
-
   async function handleTornarPrincipal(endereco: Endereco) {
     try {
-      await atualizarEndereco(usuarioId, endereco.id, { ...endereco, principal: true })
+      await atualizarMutation.mutateAsync({ enderecoId: endereco.id, request: { ...endereco, principal: true } })
       toast.success("Endereço principal atualizado.")
-      recarregar()
     } catch (error) {
       toast.error(getApiErrorMessage(error, "Não foi possível atualizar o endereço principal"))
     }
@@ -55,10 +43,9 @@ export function ListaEnderecosDoUsuario({ usuarioId }: { usuarioId: number }) {
   async function handleExcluir() {
     if (!enderecoParaExcluir) return
     try {
-      await excluirEndereco(usuarioId, enderecoParaExcluir.id)
+      await excluirMutation.mutateAsync(enderecoParaExcluir.id)
       toast.success("Endereço excluído.")
       setEnderecoParaExcluir(null)
-      recarregar()
     } catch (error) {
       toast.error(getApiErrorMessage(error, "Não foi possível excluir o endereço"))
     }
@@ -71,10 +58,7 @@ export function ListaEnderecosDoUsuario({ usuarioId }: { usuarioId: number }) {
         enderecoExistente={modo.tipo === "editar" ? modo.endereco : null}
         marcarComoPrincipalPorPadrao={(enderecos?.length ?? 0) === 0}
         onCancelar={() => setModo({ tipo: "lista" })}
-        onSalvar={() => {
-          setModo({ tipo: "lista" })
-          recarregar()
-        }}
+        onSalvar={() => setModo({ tipo: "lista" })}
       />
     )
   }
@@ -91,14 +75,14 @@ export function ListaEnderecosDoUsuario({ usuarioId }: { usuarioId: number }) {
           )}
         </div>
 
-        {enderecos === null && (
+        {isLoading && (
           <div className="grid gap-4 md:grid-cols-2">
             <Skeleton className="h-32 rounded-xl" />
             <Skeleton className="h-32 rounded-xl" />
           </div>
         )}
 
-        {enderecos !== null && enderecos.length === 0 && (
+        {!isLoading && enderecos?.length === 0 && (
           <Empty className="rounded-2xl border bg-card py-14">
             <EmptyHeader>
               <EmptyMedia variant="icon">
@@ -113,7 +97,7 @@ export function ListaEnderecosDoUsuario({ usuarioId }: { usuarioId: number }) {
           </Empty>
         )}
 
-        {enderecos !== null && enderecos.length > 0 && (
+        {!isLoading && enderecos && enderecos.length > 0 && (
           <div className="grid gap-4 md:grid-cols-2">
             {enderecos.map((endereco) => (
               <EnderecoCard

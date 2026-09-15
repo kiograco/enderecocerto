@@ -10,19 +10,16 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getApiErrorMessage } from "@/lib/api-error"
-import { listarUsuarios } from "../usuario-service"
-import type { Usuario } from "../types"
+import { useUsuarios } from "../usuario-queries"
 
 export function ListaUsuarios() {
-  const [usuarios, setUsuarios] = useState<Usuario[] | null>(null)
+  const { data: usuarios, isLoading, isError, error } = useUsuarios()
   const [busca, setBusca] = useState("")
   const router = useRouter()
 
   useEffect(() => {
-    listarUsuarios()
-      .then(setUsuarios)
-      .catch((error) => toast.error(getApiErrorMessage(error, "Não foi possível carregar os usuários")))
-  }, [])
+    if (isError) toast.error(getApiErrorMessage(error, "Não foi possível carregar os usuários"))
+  }, [isError, error])
 
   const filtrados = useMemo(() => {
     if (!usuarios) return []
@@ -61,10 +58,10 @@ export function ListaUsuarios() {
       </Card>
 
       <div className="mt-5 grid gap-3">
-        {usuarios === null &&
+        {isLoading &&
           Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-[76px] rounded-2xl" />)}
 
-        {usuarios !== null &&
+        {!isLoading &&
           filtrados.map((u) => (
             <button
               key={u.id}
@@ -91,7 +88,7 @@ export function ListaUsuarios() {
             </button>
           ))}
 
-        {usuarios !== null && filtrados.length === 0 && (
+        {!isLoading && filtrados.length === 0 && (
           <Empty className="rounded-2xl border bg-card py-16">
             <EmptyHeader>
               <EmptyMedia variant="icon">
