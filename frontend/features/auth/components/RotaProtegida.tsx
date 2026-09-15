@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "../auth-context"
 
 /**
- * Protege uma pagina client-side, ja que o token vive so em memoria (sem
- * cookie, sem localStorage) -- nao ha como um middleware de servidor checar
- * sessao. A protecao real de dado continua sendo no backend; isso aqui e so
- * pra nao mostrar UI vazia/quebrada e mandar quem nao devia ver de volta pro
- * login.
+ * Protege uma pagina client-side -- nao ha middleware de servidor checando
+ * sessao aqui. A protecao real de dado continua sendo no backend; isso aqui
+ * e so pra nao mostrar UI vazia/quebrada e mandar quem nao devia ver de
+ * volta pro login. Espera `pronto` antes de decidir: o AuthProvider ainda
+ * esta reidratando a sessao a partir do token persistido no primeiro
+ * render, e `usuario` comeca null nesse meio-tempo.
  */
 export function RotaProtegida({
   apenasAdmin = false,
@@ -18,10 +19,11 @@ export function RotaProtegida({
   apenasAdmin?: boolean
   children: React.ReactNode
 }) {
-  const { usuario } = useAuth()
+  const { usuario, pronto } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
+    if (!pronto) return
     if (!usuario) {
       router.replace("/login")
       return
@@ -29,9 +31,9 @@ export function RotaProtegida({
     if (apenasAdmin && usuario.tipo !== "ADMIN") {
       router.replace(`/usuarios/${usuario.id}`)
     }
-  }, [usuario, apenasAdmin, router])
+  }, [usuario, pronto, apenasAdmin, router])
 
-  if (!usuario || (apenasAdmin && usuario.tipo !== "ADMIN")) {
+  if (!pronto || !usuario || (apenasAdmin && usuario.tipo !== "ADMIN")) {
     return null
   }
 

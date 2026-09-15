@@ -1,4 +1,3 @@
-import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Toaster } from 'sonner'
 import { AuthProvider } from '@/features/auth/auth-context'
@@ -17,7 +16,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             {children}
           </AuthProvider>
         </QueryProvider>
-        {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
   )
