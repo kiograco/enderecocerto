@@ -1,0 +1,48 @@
+databases:
+  - name: enderecocerto-db
+    databaseName: enderecocerto
+    user: enderecocerto
+    plan: free
+
+services:
+  - type: web
+    name: enderecocerto-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    envVars:
+      - key: DB_HOST
+        fromDatabase:
+          name: enderecocerto-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: enderecocerto-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: enderecocerto-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: enderecocerto-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: enderecocerto-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://enderecocerto-frontend.onrender.com
+
+  - type: web
+    name: enderecocerto-frontend
+    runtime: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    plan: free
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: https://enderecocerto-backend.onrender.com

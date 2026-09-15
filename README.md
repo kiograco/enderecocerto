@@ -55,6 +55,18 @@ pnpm dev
 ```
 Abre em `localhost:3000`. Sem configuração extra, ele já aponta pro backend em `localhost:8080`.
 
+## Deploy (Render)
+
+`render.yaml` na raiz descreve os três serviços (Postgres + backend + frontend, cada um via seu Dockerfile) como um [Blueprint](https://render.com/docs/blueprint-spec) do Render:
+
+1. No dashboard do Render: **New → Blueprint**, conecte o repositório do GitHub.
+2. O Render lê o `render.yaml` e mostra os três recursos a criar (`enderecocerto-db`, `enderecocerto-backend`, `enderecocerto-frontend`). Confirme.
+3. Ele provisiona o Postgres primeiro, depois builda e sobe os dois serviços web (o build do backend roda o Maven, o do frontend roda o `pnpm build` — leva alguns minutos).
+4. As URLs seguem o padrão `https://<nome-do-servico>.onrender.com`. Se algum nome já estiver em uso por outra conta, o Render vai sugerir um nome diferente — nesse caso, atualize à mão as variáveis `CORS_ALLOWED_ORIGINS` (no serviço backend) e `NEXT_PUBLIC_API_URL` (no serviço frontend) pra apontar pra URL real, e dispare um **redeploy manual do frontend** (`NEXT_PUBLIC_API_URL` fica embutida no build, então só reiniciar não é suficiente).
+5. `JWT_SECRET` é gerado automaticamente pelo Render (`generateValue: true`), nunca fica exposto no repositório.
+
+Duas coisas a saber sobre o tier gratuito do Render (confira os detalhes atuais no dashboard, a política muda com o tempo): o web service "dorme" depois de um tempo sem tráfego, então a primeira requisição depois disso demora mais (~30-60s de cold start); e bancos Postgres gratuitos costumam ter validade limitada antes de precisar virar um plano pago.
+
 ## Variáveis de ambiente
 
 ### Backend
