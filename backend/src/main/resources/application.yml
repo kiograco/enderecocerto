@@ -25,5 +25,9 @@ viacep:
   base-url: ${VIACEP_BASE_URL:https://viacep.com.br/ws}
   cache-ttl-minutes: ${VIACEP_CACHE_TTL_MINUTES:60}
 
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+
 server:
   port: ${PORT:8080}
